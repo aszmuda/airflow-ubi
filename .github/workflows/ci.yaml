@@ -1,0 +1,47 @@
+name: Build and Push Airflow image
+on:
+  workflow_dispatch:
+  push:
+
+env:
+  REGISTRY: quay.io
+  REPOSITORY: modast
+  BASE_IMAGE: registry.access.redhat.com/ubi9/ubi-minimal
+  BASE_IMAGE_TAG: 9.2-717
+  AIRFLOW_VERSION: 2.7.1
+
+jobs:
+  build:
+    name: Build and push image
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Build Image
+      id: build-image
+      uses: redhat-actions/buildah-build@v2
+      with:
+        image: airflow
+        tags: v${{ env.AIRFLOW_VERSION }}
+        context: airflow
+        containerfiles: |
+          ./airflow/Dockerfile
+        build-args: |
+          BASE_IMAGE=${{ env.BASE_IMAGE }}:${{ env.BASE_IMAGE_TAG }}
+          AIRFLOW_VERSION=${{ env.AIRFLOW_VERSION }}
+
+    # Podman Login action (https://github.com/redhat-actions/podman-login) also be used to log in,
+    # in which case 'username' and 'password' can be omitted.
+    - name: Push To quay.io
+      id: push-to-quay
+      uses: redhat-actions/push-to-registry@v2
+      with:
+        image: ${{ steps.build-image.outputs.image }}
+        tags: ${{ steps.build-image.outputs.tags }}
+        registry: ${{ env.REGISTRY }}/${{ env.REPOSITORY }}
+        username: ${{ secrets.REGISTRY_USER }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
+
+    - name: Print image url
+      run: echo "Image pushed to ${{ steps.push-to-quay.outputs.registry-paths }}"
