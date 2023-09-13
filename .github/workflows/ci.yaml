@@ -24,7 +24,6 @@ jobs:
       with:
         image: airflow
         tags: v${{ env.AIRFLOW_VERSION }}
-        context: airflow
         containerfiles: |
           Dockerfile
         build-args: |
