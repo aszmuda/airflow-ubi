@@ -7,8 +7,8 @@ env:
   REGISTRY: quay.io
   REPOSITORY: modast
   BASE_IMAGE: registry.access.redhat.com/ubi9/ubi-minimal
-  BASE_IMAGE_TAG: 9.2-717
-  AIRFLOW_VERSION: 2.7.1
+  BASE_IMAGE_TAG: 9.3-1361
+  AIRFLOW_VERSION: 2.7.3
 
 jobs:
   build:
